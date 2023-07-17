@@ -1,0 +1,24 @@
+{
+  "name": "codechat",
+  "version": "1.0.0",
+  "description": "website to chat while coding!",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon backend/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NIXBLACK11/codeChat.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NIXBLACK11/codeChat/issues"
+  },
+  "homepage": "https://github.com/NIXBLACK11/codeChat#readme",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "nodemon": "^3.0.1"
+  }
+}
