@@ -48,7 +48,6 @@ const chats = [
       _id: "dfg4567hjk",
       chatName: "travel enthusiasts",
     },
-    // Add more chat objects here
     {
       isGroupChat: false,
       users: [
