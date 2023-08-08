@@ -5,6 +5,7 @@ const ChatContext = createContext();
 
 const ChatProvider = ({ children }) => {
     const [user, setUser] = useState();
+    const [selectedChat, setSelectedChat] = useState();
 
     const history = useHistory()
 
@@ -14,7 +15,7 @@ const ChatProvider = ({ children }) => {
 
         if(!userInfo)
         {
-            history.pushState('/');
+            history.push('/');
         }
     }, [history]);
 
