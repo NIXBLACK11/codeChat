@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Input, FormControl, useDisclosure, Modal, ModalBody, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalFooter, Button, useToast } from '@chakra-ui/react';
 import { ChatState } from '../../Context/ChatProvider';
+import axios from 'axios';
 const GroupChatModal = ({ children }) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
-    const { GroupChat, setgroupChat } = useState();
+    const { GroupChatName, setgroupChatName } = useState();
     const { selectedUsers, setselectedUsers } = useState([]);
     const [search, setSearch] = useState("");
     const [searchResult, setSearchResult] = useState([]);
@@ -13,7 +14,37 @@ const GroupChatModal = ({ children }) => {
 
     const { user, chats, setChats } = ChatState();
 
-    const handleSearch = () => {};
+    const handleSearch = async(query) => {
+        setSearch(query);
+        if(!query)
+        {
+            return;
+        }
+        try {
+            setLoading(true);
+      
+            const config = {
+              headers: {
+                Authorization: `Bearer ${user.token}`,
+              },
+            };
+      
+            const { data } = await axios.get(`/api/user?search=${search}`, config);
+      
+            setLoading(false);
+            console.log(data);
+            setSearchResult(data);
+          } catch (error) {
+            toast({
+              title: "Error Occured!",
+              description: "Failed to Load the Search Results",
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+              position: "bottom-left",
+            });
+        }
+    };
     const handleSubmit = () => {};
     return (
         <>
