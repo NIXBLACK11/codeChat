@@ -30,56 +30,58 @@ const SideDrawer = () => {
   const toast = useToast();
 
   const handleSearch = async () => {
-    if(!search){
+    if (!search) {
       toast({
-        title: "Please enter something to serach",
+        title: "Please Enter something in search",
         status: "warning",
         duration: 5000,
         isClosable: true,
         position: "top-left",
-    });
-    return;
+      });
+      return;
     }
+
     try {
       setLoading(true);
+
       const config = {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const {data} = await axios.get(`/api/user?search=${search}`, config)
-      if(!chats.find((c) => c._id === data._id)) setSelectedChat(data)
-      {
-        setChats([data, ...chats]);
-      }
-      setLoadingChat(false);
+
+      const { data } = await axios.get(`/api/user?search=${search}`, config);
+
+      setLoading(false);
       setSearchResult(data);
-    }catch(error){
+    } catch (error) {
       toast({
         title: "Error Occured!",
-        description: "Failed to load the search results",
+        description: "Failed to Load the Search Results",
         status: "error",
         duration: 5000,
         isClosable: true,
         position: "bottom-left",
-    });
+      });
     }
   };
 
-  const accessChat = async (userId) =>{
+  const accessChat = async (userId) => {
+    console.log(userId);
+
     try {
-      setLoading(true);
+      setLoadingChat(true);
       const config = {
         headers: {
-          "Content-type":"application/json",
+          "Content-type": "application/json",
           Authorization: `Bearer ${user.token}`,
         },
       };
+      const { data } = await axios.post(`/api/chat`, { userId }, config);
 
-      const {data} = await axios.post('/api/chat', {userId}, config);
-
+      if (!chats.find((c) => c._id === data._id)) setChats([data, ...chats]);
       setSelectedChat(data);
-      setLoading(false);
+      setLoadingChat(false);
       onClose();
     } catch (error) {
       toast({
@@ -89,9 +91,10 @@ const SideDrawer = () => {
         duration: 5000,
         isClosable: true,
         position: "bottom-left",
-    });
+      });
     }
   };
+  
   return (
     <>
     <Box 
