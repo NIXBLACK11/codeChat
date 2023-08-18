@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 import { Input, FormControl, useDisclosure, Modal, ModalBody, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalFooter, Button, useToast } from '@chakra-ui/react';
 import { ChatState } from '../../Context/ChatProvider';
 import axios from 'axios';
+import UserListItem from "../UserAvatar/UserListItem";
+import UserBadgeItem from '../UserAvatar/UserBadgeItem';
+
 const GroupChatModal = ({ children }) => {
-    const { isOpen, onOpen, onClose } = useDisclosure()
-    const { GroupChatName, setgroupChatName } = useState();
-    const { selectedUsers, setselectedUsers } = useState([]);
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [groupChatName, setgroupChatName] = useState(""); // Fixed this line
+    const [selectedUsers, setselectedUsers] = useState([]); // Fixed this line
     const [search, setSearch] = useState("");
     const [searchResult, setSearchResult] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -32,7 +35,6 @@ const GroupChatModal = ({ children }) => {
             const { data } = await axios.get(`/api/user?search=${search}`, config);
       
             setLoading(false);
-            console.log(data);
             setSearchResult(data);
           } catch (error) {
             toast({
@@ -46,6 +48,22 @@ const GroupChatModal = ({ children }) => {
         }
     };
     const handleSubmit = () => {};
+    const handleDelete = () => {};
+    const handleGroup = (userToAdd) => {
+      if (selectedUsers.includes(userToAdd)) {
+        toast({
+          title: "User already added",
+          status: "warning",
+          duration: 5000,
+          isClosable: true,
+          position: "top",
+        });
+        return;
+      }
+      else {
+        setselectedUsers([...selectedUsers, userToAdd]);
+      }
+    };
     return (
         <>
           <span onClick={onOpen}>{children}</span>
@@ -69,15 +87,24 @@ const GroupChatModal = ({ children }) => {
                 <FormControl>
                     <Input placeholder="Add Users" mb={1} onChange={(e) => handleSearch(e.target.value)}/>
                 </FormControl>
-                {/* selected users */}
-                {/* render searched users */}
+                {selectedUsers.map((u) => (
+                  <UserBadgeItem 
+                    key={user._id} 
+                    user={u}
+                    handleFunction={() => handleDelete(u)}
+                  />
+                ))}
+                {loading?<div>loading...</div> : (
+                  searchResult?.slice(0, 4).map(user => (
+                    <UserListItem key={user._id} user={user} handleFunction={() => handleGroup(user)}/>
+                  ))
+                )}
               </ModalBody>
     
               <ModalFooter>
                 <Button colorScheme='blue' onClick={handleSubmit}>
                   Create Chat
                 </Button>
-                <Button variant='ghost'>Secondary Action</Button>
               </ModalFooter>
             </ModalContent>
           </Modal>
