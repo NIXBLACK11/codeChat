@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Input, FormControl, useDisclosure, Modal, ModalBody, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalFooter, Button, useToast } from '@chakra-ui/react';
+import { Box, Input, FormControl, useDisclosure, Modal, ModalBody, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalFooter, Button, useToast } from '@chakra-ui/react';
 import { ChatState } from '../../Context/ChatProvider';
 import axios from 'axios';
 import UserListItem from "../UserAvatar/UserListItem";
@@ -47,8 +47,56 @@ const GroupChatModal = ({ children }) => {
             });
         }
     };
-    const handleSubmit = () => {};
-    const handleDelete = () => {};
+
+    const handleSubmit = async() => {
+      if(!groupChatName || !selectedUsers)
+      {
+        toast({
+          title: "Please fill all the fields",
+          status: "warning",
+          duration: 5000,
+          isClosable: true,
+          position: "top",
+        });
+        return;
+      }
+      try {
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+
+        const { data } = await axios.post('/api/chat/group', {
+          name: groupChatName,
+          users: JSON.stringify(selectedUsers.map((u) => u._id)),
+        }, config);
+
+        setChats([data, ...chats]);
+        onClose();
+        toast({
+          title: "New Group Chat Created!",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      } catch (error) {
+        toast({
+          title: "Failed to Create the chat!",
+          description: error.response.data,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      }
+    };
+
+    const handleDelete = (delUser) => {
+      setselectedUsers(selectedUsers.filter((sel) => sel._id !== delUser._id));
+    };
+
     const handleGroup = (userToAdd) => {
       if (selectedUsers.includes(userToAdd)) {
         toast({
@@ -87,18 +135,20 @@ const GroupChatModal = ({ children }) => {
                 <FormControl>
                     <Input placeholder="Add Users" mb={1} onChange={(e) => handleSearch(e.target.value)}/>
                 </FormControl>
-                {selectedUsers.map((u) => (
-                  <UserBadgeItem 
-                    key={user._id} 
-                    user={u}
-                    handleFunction={() => handleDelete(u)}
-                  />
-                ))}
-                {loading?<div>loading...</div> : (
-                  searchResult?.slice(0, 4).map(user => (
-                    <UserListItem key={user._id} user={user} handleFunction={() => handleGroup(user)}/>
-                  ))
-                )}
+                <Box w="100%" display="flex" flexWrap="wrap">
+                  {selectedUsers.map((u) => (
+                    <UserBadgeItem 
+                      key={user._id} 
+                      user={u}
+                      handleFunction={() => handleDelete(u)}
+                    />
+                  ))}
+                  {loading?<div>loading...</div> : (
+                    searchResult?.slice(0, 4).map(user => (
+                      <UserListItem key={user._id} user={user} handleFunction={() => handleGroup(user)}/>
+                    ))
+                  )}
+                </Box>
               </ModalBody>
     
               <ModalFooter>
