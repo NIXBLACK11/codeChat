@@ -1,11 +1,12 @@
 import React from 'react';
-import { FormControl, Input, useToast, Box, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button } from "@chakra-ui/react";
+import { Spinner, FormControl, Input, useToast, Box, IconButton, Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button } from "@chakra-ui/react";
 import { ViewIcon } from "@chakra-ui/icons";
 import { useDisclosure } from '@chakra-ui/hooks';
 import { ChatState } from '../../Context/ChatProvider';
 import { useState } from 'react';
 import UserBadgeItem from '../UserAvatar/UserBadgeItem';
 import axios from 'axios';
+import UserListItem from '../UserAvatar/UserListItem';
 
 const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -19,6 +20,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
   const { selectedChat, setSelectedChat, user } = ChatState();
 
   const handleRemove = () => {};
+  const handleAddUser = () => {};
   const handleRename = async() => {
     if(!groupChatName) return;
     try {
@@ -52,7 +54,7 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
       setGroupChatName("");
     }
   };
-  const handleSearch = () => {
+  const handleSearch = async(query) => {
     setSearchResult(query);
     if(!query){
       return;
@@ -64,9 +66,20 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data }
+      const { data } = await axios.get('/api/user?search=${search', config);
+      console.log(data);
+      setLoading(false);
+      setSearchResult(data);
     } catch (error) {
-      
+      toast({
+        title: "Error occured",
+        description: "Failed to load the search Results",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom-left",
+      });
+      setLoading(false);
     }
   };
   
@@ -112,6 +125,17 @@ const UpdateGroupChatModal = ({ fetchAgain, setFetchAgain }) => {
                   onChange={(e) => handleSearch(e.target.value)}
                 />
             </FormControl>
+            {loading ? (
+              <Spinner size="lg"/>
+            ) : (
+              searchResult.map((user) => (
+                <UserListItem
+                  key={user._id}
+                  user={user}
+                  handleFunction={() => handleAddUser(user)}
+                />
+              ))
+            )}
           </ModalBody>
 
           <ModalFooter>
