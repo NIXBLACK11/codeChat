@@ -20,7 +20,7 @@ app.get('/', (req,res) => {
 
 app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
-app.use('/api/messages', messageRoutes);
+app.use('/api/message', messageRoutes);
 // app.get('/api/chat',(req,res)=>{
 //     res.send(chats);
 // });

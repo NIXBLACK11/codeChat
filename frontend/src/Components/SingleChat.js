@@ -2,19 +2,21 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { ChatState } from '../Context/ChatProvider';
 import { Box, FormControl, IconButton, Text } from '@chakra-ui/react';
-import { ArrowBackIcon } from "@chakra-ui/icons";
 import { getSenderFull, getSender } from "../config/ChatLogics";
+import { ArrowBackIcon } from "@chakra-ui/icons";
 import ProfileModal from './miscellaneous/ProfileModal';
 import UpdateGroupChatModal from './miscellaneous/UpdateGroupChatModal';
 import { Spinner, Input, useToast } from '@chakra-ui/react';
+import ScrollableChat from './ScrollableChat';
+import "./styles.css";
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
-
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [newMessage, setNewMessage] = useState();
+    const [newMessage, setNewMessage] = useState('');
 
-    const toast = useToast;
+    // Move useToast inside the functional component
+    const toast = useToast();
 
     const { user, selectedChat, setSelectedChat } = ChatState();
 
@@ -24,7 +26,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         try {
             const config = {
                 headers: {
-                    Authorization:`Bearer ${user.tokrn}`,
+                    Authorization:`Bearer ${user.token}`,
                 },
             };
 
@@ -32,6 +34,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
 
             const {data} = await axios.get(`/api/message/${selectedChat._id}`, config);
 
+            console.log(messages)
             setMessages(data);
             setLoading(false);
         } catch (error) {
@@ -47,8 +50,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     };
 
     useEffect(() => {
-        return () => {}
-    }, [])
+        fetchMessages();
+    }, [selectedChat])
 
     const sendMessage = async(event) => {
         if(event.key==="Enter"  &&  newMessage) {
@@ -56,7 +59,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                 const config = {
                     headers: {
                         "Content.Type" : "application/json",
-                        Authorization:`Bearer ${user.tokrn}`,
+                        Authorization:`Bearer ${user.token}`,
                     },
                 };
                 
@@ -119,6 +122,7 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                     <UpdateGroupChatModal
                         fetchAgain={fetchAgain}
                         setFetchAgain={setFetchAgain}
+                        fetchMessages={fetchMessages}
                     />
                     </>
                 )}
@@ -139,8 +143,8 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
                             size="xl" w={20} h={20} alignSelf="center" margin="auto"
                         />
                     ) : (
-                        <div>
-                            
+                        <div className='messages'>
+                            <ScrollableChat messages={messages}/>
                         </div>
                     )}
                     <FormControl onKeyDown={sendMessage} isRequired mt={3}>
